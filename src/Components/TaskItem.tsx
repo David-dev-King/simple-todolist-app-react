@@ -28,7 +28,7 @@ function TaskItem({ task, editTask, deleteTask, toggleComplete, selectTask, move
     }, [task.completed, task.id]);
 
     return (
-        <li ref={liRef} onMouseDown={() => {selectTask(task.id);}} onMouseUp={() => moveTask(task.id)} className="
+        <li data-task-id={task.id} ref={liRef} onMouseDown={() => {selectTask(task.id);}} onMouseUp={() => moveTask(task.id)} className="
             select-none
             relative
             flex
