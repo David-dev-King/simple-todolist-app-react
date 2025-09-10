@@ -1,6 +1,22 @@
 import { useEffect, useRef } from 'react';
 import type { task } from '../App';
 
+/**
+ * @param {TaskItemProps} props The props for the TaskItem component.
+ * @param {task} props.task The single task item to be rendered.
+ * @param {function(task: task):void} props.editTask Callback function to edit the text of the specified task.
+ * @param {function(id: number):void} props.toggleComplete Callback function to toggle the completion of the task with the specified ID.
+ * @param {function(id: number):void} props.deleteTask Callback function to delete the task with the specified ID.
+ * @param {function(id: number):void} props.selectTask Callback function to handle the selection of the task with the specified ID.
+ * @param {function(id: number):void} props.moveTask Callback function to handle moving a task to the index of the task with the specified ID.
+ * @returns {JSX.Element} A single, interactive task item with text and action buttons.
+ * @description A visual component representing a single task, with actions for editing, deleting, and marking it as complete.
+ * @exports TaskItem
+ */
+
+
+
+
 type TaskItemProps = {
     task: task;
     editTask: (task: task) => void;
@@ -13,6 +29,8 @@ type TaskItemProps = {
 function TaskItem({ task, editTask, deleteTask, toggleComplete, selectTask, moveTask }: TaskItemProps) {
     const liRef = useRef<HTMLLIElement>(null);
     const strikeThroughRef = useRef<HTMLSpanElement>(null);
+
+    // Update data attributes based on task completion status
     useEffect(() => {
         const listItem = liRef.current as HTMLLIElement;
         const strikeThrough = strikeThroughRef.current as HTMLSpanElement;

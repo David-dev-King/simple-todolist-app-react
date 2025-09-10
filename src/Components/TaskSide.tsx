@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import type { task, todoList } from '../App';
 
 import { curList, deletedTasks } from '../App';
@@ -18,11 +18,21 @@ var selectedTaskId : number;
 var isEditing = false;
 
 
+/**
+ * @returns {JSX.Element} The entire task side of the page.
+ * @description A React component representing the entire task side of the page, consisting of the task content, edit task form, screen overlay, and undo delete button.
+ * @exports TaskSide
+ */
+
+
+
 function TaskSide() {
     const [currentList, setCurrentList] = useState<todoList | null>(curList?{...curList}:null);
     const [, set] = useState<task | null>(null);
     const [, setEditing] = useState(isEditing);
     document.title = "Task Manager - " + (curList ? curList.name : "No List Selected");
+
+    // Close edit form on Escape key press
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === "Escape" && isEditing) {
@@ -36,6 +46,8 @@ function TaskSide() {
         };
     }, [isEditing, setEditing]);
     
+
+    // Update currentList when curList changes
     useEffect(() => {
         function setCur() {if (curList) setCurrentList({...curList}); else setCurrentList(null)};
         eventBus.addEventListener("onTasks", setCur);

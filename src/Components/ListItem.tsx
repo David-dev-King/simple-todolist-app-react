@@ -1,11 +1,21 @@
 import type { todoList } from '../App';
 
+/**
+ * @param {ListItemProps} props The props for the ListItem component.
+ * @param {todoList} props.list The single to-do list object to be rendered.
+ * @param {function(id: number):void} props.setCurrentList Callback function to set the currently selected to-do list based on its ID.
+ * @param {function(value: boolean, list?: todoList):void} props.setOptions Callback function to toggle the display of the options menu for a list.
+ * @returns {JSX.Element} A component that displays a single to-do list item.
+ * @description A visual representation of a single to-do list item.
+ * @exports ListItem
+ */
+
+
 interface ListItemProps {
     list: todoList;
     setCurrentList: (id: number) => void;
     setOptions: (value : boolean, list? : todoList) => void;
 }
-
 function ListItem({ list, setCurrentList, setOptions } : ListItemProps) {
     return (
         <li data-list-id={list.id} className={`

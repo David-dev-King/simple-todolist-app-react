@@ -1,3 +1,8 @@
+/**
+ * @returns {JSX.Element} A div element that renders as a mouse-following light effect.
+ * @description A component that renders a background light effect which follows the cursor's movements.
+ * @exports MouseLight
+ */
 
 document.onmousemove = (e) => {
     const light = document.querySelector('.mouse-light') as HTMLDivElement;

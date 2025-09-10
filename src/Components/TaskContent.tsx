@@ -3,6 +3,24 @@ import NewTaskForm from "./NewTaskForm";
 import TaskPanel from "./TaskPanel";
 
 
+
+/**
+ * @param {TaskContentProps} props The props for the TaskContent component.
+ * @param {todoList} props.currentList The to-do list containing the tasks to be rendered.
+ * @param {function(text: string):void} props.addTask Callback function to create a new task with the given text.
+ * @param {function(task: task):void} props.editTask Callback function to edit the text of the specified task.
+ * @param {function(id: number):void} props.toggleComplete Callback function to toggle the completion of the task with the specified ID.
+ * @param {function(id: number):void} props.deleteTask Callback function to delete the task with the specified ID.
+ * @param {function(id: number):void} props.selectTask Callback function to handle the selection of the task with the specified ID.
+ * @param {function(newIndex: number):void} props.moveTask Callback function to handle moving of the selected task to the specified index of the array.
+ * @returns {JSX.Element} A container element for the current to-do list title, the new-task form and the task panel.
+ * @description A React component housing all the contents of the task side of the document.
+ * @exports TaskContent
+ */
+
+
+
+
 interface TaskContentProps {
     currentList: todoList;
     addTask: (text: string) => void;

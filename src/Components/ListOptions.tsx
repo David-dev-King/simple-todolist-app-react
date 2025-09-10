@@ -1,5 +1,22 @@
 import type { todoList } from "../App";
 import { useEffect, useRef } from "react";
+
+/**
+ * @param {ListOptionsProps} props The props for the ListOptions component.
+ * @param {todoList | null} [props.list] The to-do list whose options are currently being displayed.
+ * @param {boolean} props.isOption A boolean to toggle the visibility of the options panel.
+ * @param {function():void} props.disable Callback function to hide or diable the options panel.
+ * @param {function(id: number):void} [props.onPin] Callback function to pin the to-do list with the specified ID.
+ * @param {function(id: number):void} [props.onEdit] Callback function to edit the to-do list with the specified ID.
+ * @param {function(id: number):void} [props.onDelete] Callback function to delete the to-do list with the specified ID.
+ * @returns {JSX.Element} A component that displays the options for a to-do list.
+ * @description A component that renders the options (pin, edit, and delete) for a specific to-do list.
+ * @exports ListOptions
+ */
+
+
+
+
 interface ListOptionsProps {
     list? : todoList | null;
     isOption: boolean;
@@ -11,6 +28,8 @@ interface ListOptionsProps {
 
 function ListOptions({ list, isOption, disable, onPin, onEdit, onDelete } : ListOptionsProps ) {
     const listOptionsRef = useRef<HTMLUListElement>(null);
+
+    // Disable the options if we click outside of it
     useEffect(() => {
         function onMouseDown(e: MouseEvent) {
             if (listOptionsRef.current && !listOptionsRef.current.contains(e.target as Node)) disable();

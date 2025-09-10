@@ -1,5 +1,17 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import type { task } from '../App';
+
+
+/**
+ * @param {EditTaskFormProps} props The props for the EditTaskForm component.
+ * @param {task} [props.task] The task item to be edited.
+ * @param {boolean} [props.isEditing] A boolean to toggle the display of the form.
+ * @param {function(id: number, newText?: string):void} [props.onSubmit] Callback function to handle the submission of the form.
+ * @param {function():void} [props.onblur] Callback function to hide the form.
+ * @returns {JSX.Element | null} A form to edit the text of a task or null if not visible.
+ * @description A React component that displays a form for editing the text of a task.
+ * @exports EditTaskForm
+ */
 
 interface EditTaskFormProps {
     task?: task;
@@ -8,13 +20,23 @@ interface EditTaskFormProps {
     onblur?: () => void;
 }
 
-
 function EditTaskForm({ task, isEditing, onSubmit, onblur } : EditTaskFormProps) {
     const [inputValue, setInputValue] = useState(task?.text||"");
-    useEffect (() => {setInputValue(task?.text||""); (document.getElementById("edit-task-input") as HTMLInputElement).focus()}, [task]);
-    let taskItem = document.querySelector('[data-task-id = "' + task?.id + '"]');
-    let taskTop : string = `${taskItem?.getBoundingClientRect().top?  taskItem?.getBoundingClientRect().top + window.scrollY: 0}px`;
-    let taskLeft : string = `${taskItem?.getBoundingClientRect().left? taskItem?.getBoundingClientRect().left + window.scrollX: 0}px`;
+    const taskInputRef = useRef<HTMLInputElement>(null);
+
+
+    // Change the text in the input element to the task text and focus on the input element once it appears
+    useEffect (() => {setInputValue(task?.text||""); isEditing && (taskInputRef.current as HTMLInputElement).focus()}, [task, isEditing]);
+
+    if (!task || !isEditing) return;
+
+
+    // Make sure form always appears on top of the task that is being edited
+    const taskItem = document.querySelector('[data-task-id = "' + task.id + '"]') as HTMLElement;
+    const taskTop : string = `${taskItem.getBoundingClientRect().top?  taskItem?.getBoundingClientRect().top + window.scrollY: 0}px`;
+    const taskLeft : string = `${taskItem.getBoundingClientRect().left? taskItem?.getBoundingClientRect().left + window.scrollX: 0}px`;
+
+
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
         if (onSubmit) {
@@ -37,12 +59,13 @@ function EditTaskForm({ task, isEditing, onSubmit, onblur } : EditTaskFormProps)
             w-xl
             z-6
             "
-            style={{display : isEditing?'flex': 'none' , top: taskTop, left: taskLeft}}
+            style={{top: taskTop, left: taskLeft}}
             id="edit-task-form"
             onSubmit={handleSubmit}
             onBlur={onblur}
         >
             <input
+                ref={taskInputRef}
                 className="
                     grow
                     outline-amber-100

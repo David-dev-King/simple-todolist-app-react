@@ -12,12 +12,16 @@ import ScreenOverlay from './ScreenOverlay';
 import DeletePanel from './DeletePanel';
 
 
+/**
+ * @returns {JSX.Element} A component that displays to-do list side of the page.
+ * @description A component for the enitre to-do list side of the page, housing the scren overlay, the edit task form, the delete panel, the list options and the list content, and well as handling all their functionality.
+ * @exports ListSide
+ */
 
-interface ListSideProps {
-}
 
-function ListSide({} : ListSideProps) {
-    const [lists, setLists] = useState<todoList[]>([...Lists]);
+
+function ListSide() {
+    const [, setLists] = useState<todoList[]>([...Lists]);
     const [displayedLists, setDisplayedLists] = useState<todoList[]>([...Lists]);
 
     const [selectedList, setSelectedList] = useState<todoList | null>(null)
@@ -26,7 +30,7 @@ function ListSide({} : ListSideProps) {
     const [isEditing, setIsEditing] = useState<boolean>(false);
     const [isDeleting, setIsDeleting] = useState<boolean>(false);
 
-
+    // Reload the lists everytime the "onLists" event is dispatched
     useEffect(() => {
         function setListsFunc(){ console.log("Lists Loaded"); setLists([...Lists]); setDisplayedLists([...Lists]); };
         eventBus.addEventListener("onLists", setListsFunc);

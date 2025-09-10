@@ -1,12 +1,25 @@
 import { useEffect, useRef } from "react";
 import type { todoList } from "../App";
 
+/**
+ * @param {DeletePanelProps} props The props for the DeletePanel component.
+ * @param {todoList} [props.list] The to-do item list to be deleted.
+ * @param {boolean} [props.isDeleting] A boolean to toggle the display of the delete panel.
+ * @param {function(id: number):void} [props.onDelete] Callback function to handle the deletion of a to-do item with the given id.
+ * @param {function():void} props.disable Callback function to disable the delete panel.
+ * @returns {JSX.Element | null} A delete confirmation panel or null if not visible.
+ * @description A React component that displays a confirmation panel for deleting a to-do item.
+ * @exports DeletePanel
+ */
+
+
 interface DeletePanelProps{
     list? : todoList;
     isDeleting? : boolean;
     onDelete? : (id: number) => void;
     disable : () => void;
 }
+
 
 
 function DeletePanel({list, isDeleting, onDelete, disable} : DeletePanelProps){

@@ -1,5 +1,17 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import type { todoList } from '../App';
+
+
+/**
+ * @param {EditListFormProps} props The props for the EditListForm component.
+ * @param {todoList} [props.list] The to-do list item to be edited.
+ * @param {boolean} [props.isEditing] A boolean to toggle the display of the form.
+ * @param {function(id?: number, newName?: string):void} [props.onSubmit] Callback function to handle the submission of the form.
+ * @param {function():void} [props.onblur] Callback function to hide the form.
+ * @returns {JSX.Element | null} A form to edit the name of a to-do list or null if not visible.
+ * @description A React component that displays a form for editing the name of a to-do list.
+ * @exports EditListForm
+ */
 
 interface EditListFormProps {
     list?: todoList;
@@ -8,17 +20,24 @@ interface EditListFormProps {
     onblur?: () => void;
 }
 
-
 function EditListForm({ list, isEditing, onSubmit, onblur } : EditListFormProps) {
     const [inputValue, setInputValue] = useState(list?.name||"");
-    useEffect (() => {setInputValue(list?.name||""); (document.getElementById("edit-list-input") as HTMLInputElement).focus()}, [list, isEditing]);
+    const listInputRef = useRef<HTMLInputElement>(null);
+
+    // Change the text in the input element to the list name and focus on the input element once it appears
+    useEffect (() => {setInputValue(list?.name||""); isEditing && (listInputRef.current as HTMLInputElement).focus();}, [list, isEditing]);
+
+
+    if (!list || !isEditing) return;
+    
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
         if (onSubmit) {
-            onSubmit( list?.id ,inputValue? inputValue : "");
+            onSubmit( list.id ,inputValue? inputValue : "");
         }
         setInputValue("");
     };
+
 
     return (
         <form className="
@@ -38,12 +57,12 @@ function EditListForm({ list, isEditing, onSubmit, onblur } : EditListFormProps)
             w-xl
             z-6
             "
-            style={{display : isEditing?'flex': 'none'}}
             id="edit-list-form"
             onSubmit={handleSubmit}
             onBlur={onblur}
         >
             <input
+                ref={listInputRef}
                 className="
                     grow
                     outline-amber-100

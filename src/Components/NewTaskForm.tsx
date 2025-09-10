@@ -1,6 +1,15 @@
 import { useState } from 'react';
 
 
+/**
+ * @param {NewTaskFormProps} props The props for the NewTaskForm component.
+ * @param {function(text: string):void} [props.onSubmit] Callback function to handle the submission of the form.
+ * @returns {JSX.Element} A form to create a new task.
+ * @description A React component for a form that handles creation of new tasks.
+ * @exports NewTaskForm
+ */
+
+
 interface NewTaskFormProps {
     onSubmit?: (text: string) => void;
 }

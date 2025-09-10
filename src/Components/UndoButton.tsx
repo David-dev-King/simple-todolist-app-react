@@ -1,4 +1,11 @@
-
+/**
+ * @param {UndoButtonProps} props The props for the UndoButton component.
+ * @param {function():void} props.undoDeleteTask Callback function to undo the deletion of the most recently deleted task.
+ * @param {boolean} [props.disabled] Boolean to control whether the button is disabled or not.
+ * @returns {JSX.Element} A button to undo task deletion.
+ * @description A React component for a button that undoes the deletion of a task.
+ * @exports UndoButton
+ */
 interface UndoButtonProps {
     undoDeleteTask: () => void;
     disabled?: boolean;

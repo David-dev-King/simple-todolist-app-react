@@ -10,6 +10,9 @@ For now, all data is stored in LocalStorage but in the very near future, I'll ad
 
 I would also love to use this project to learn about react promises and using APIs from other apps. Until then 👋.
 
+## ✍️ Update
+I learnt about the importance of clean code documentation and decided to document my code. I'm still working on the bakend and simple account system, but it's not ready to be pushed yet. Until then 🤞.
+
 ## 🙏 Thanks
 
 Thanks for checking this out! This project is still unfinished, but I'd appriciate your feedback 👊.

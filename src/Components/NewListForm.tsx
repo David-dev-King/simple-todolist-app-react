@@ -1,5 +1,14 @@
 import { useState } from 'react';
 
+/**
+ * @param {NewListFormProps} props The props for the NewListForm component.
+ * @param {function(text: string):void} [props.onSubmit] Callback function to handle the submission of the form.
+ * @param {function(text: string):void} [props.onChange] Callback function to handle list filtering when the text in the input field changes.
+ * @returns {JSX.Element} A form to create a new to-do list.
+ * @description A React component for a form that handles creation of new to-do lists and filtering of displayed lists.
+ * @exports NewListForm
+ */
+
 
 interface NewListFormProps {
     onSubmit?: (text: string) => void;
