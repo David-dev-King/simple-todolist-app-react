@@ -35,7 +35,7 @@ interface TaskContentProps {
 function TaskContent({ currentList, addTask, editTask, toggleComplete, deleteTask, selectTask, moveTask } : TaskContentProps) {
     return (
         <div className='
-            max-w-1/3'>
+            max-w-1/3 max-lg:max-w-2/3'>
             <h1 className="text-5xl font-bold mt-10 mb-10">{currentList.name}</h1>
             <NewTaskForm onSubmit={addTask} />
             <TaskPanel tasks={currentList.tasks} editTask={editTask} deleteTask={deleteTask} toggleComplete={toggleComplete} selectTask={selectTask} moveTask={moveTask}/>

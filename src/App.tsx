@@ -1,12 +1,10 @@
-
-import { loadTasks } from './App';
+import Forms from './Components/Forms';
 
 import ListSide from './Components/ListSide';
 import MouseLight from './Components/MouseLight';
 import TaskSide from './Components/TaskSide';
 
 
-loadTasks();
 
 function App() {
 
@@ -18,6 +16,7 @@ function App() {
         flex-row
       ">
         <MouseLight/>
+        <Forms/>
         <ListSide/>
         <TaskSide/>
       </div>

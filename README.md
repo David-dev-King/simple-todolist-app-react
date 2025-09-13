@@ -13,6 +13,9 @@ I would also love to use this project to learn about react promises and using AP
 ## ✍️ Update
 I learnt about the importance of clean code documentation and decided to document my code. I'm still working on the bakend and simple account system, but it's not ready to be pushed yet. Until then 🤞.
 
+## ✍️ Update
+'hook up the database to an AWS s3bucket' was probably the dumbest thing I could have said 😂. Anyway, I'm done with the basic account system. There's some security issues, like, the password isn't hashed when it's saved, but I suppose it's fine for now. It's also not responsive for mobile. It would be live in a couple of hours.
+
 ## 🙏 Thanks
 
 Thanks for checking this out! This project is still unfinished, but I'd appriciate your feedback 👊.

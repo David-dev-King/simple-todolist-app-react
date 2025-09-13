@@ -133,6 +133,7 @@ export function addList(name: string) {
     });
     curList = tempList;
     Lists.push(tempList);
+    deletedTasks = [];
     saveTasks();
 }
 
@@ -207,6 +208,7 @@ export function setCurrentList(id: number) {
         list.current = true;
         curList = list;
     }
+    deletedTasks = [];
     saveTasks();
 }
 
@@ -316,11 +318,22 @@ export function undoDeleteTask() {
  * @description Saves all to-do lists to local storage and dispatches an update event.
  * @returns {void}
  */
-function saveLists() {
-    console.log("Lists saved!!!");
-    eventBus.dispatchEvent(onLists);
-    localStorage.setItem("Lists", JSON.stringify(Lists));
-    if (Lists.length == 0) return;
+async function saveLists() {
+    try {
+        const response = await fetch('http://localhost:3001/users/' + localStorage.getItem('userID')+'/lists', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ lists: Lists }),
+        });
+        if (response.ok){
+            eventBus.dispatchEvent(onLists);
+            console.log("Lists saved!!!");
+        }
+    } catch (error) {
+        console.error('Error saving lists:', error);
+    }
 }
 
 
@@ -329,10 +342,24 @@ function saveLists() {
  * @description Loads to-do lists from local storage.
  * @returns {void}
  */
-function loadLists() {
-    const _listsJSON: string = String(localStorage.getItem("Lists"));
-    const _tempLists: todoList[] = JSON.parse(_listsJSON);
-    if (_tempLists != null) Lists = _tempLists;
+async function loadLists() {
+    try {
+        const response = await fetch('http://localhost:3001/users/' + localStorage.getItem('userID')+'/lists', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+        if (response.ok){
+            const data = await response.json();
+            Lists = data;
+            eventBus.dispatchEvent(onLists);
+            console.log("Lists loaded!!!");
+            if (Lists.length == 0) return;
+        }
+    } catch (error) {
+        console.error('Error loading lists:', error);
+    }
 }
 
 
@@ -356,14 +383,11 @@ function saveTasks() {
  * @returns {void}
  */
 export function loadTasks() {
-    loadLists();
-    for (let i = 0; i < Lists.length; i++) {
-        if (Lists[i].current == true) curList = Lists[i];
-    }
+    loadLists()
+    .then (()=>{
+        for (let i = 0; i < Lists.length; i++) {if (Lists[i].current == true) curList = Lists[i];};
+        eventBus.dispatchEvent(onTasks);
+        console.log("Tasks loaded!!!");
+    })
 }
 
-
-
-
-
-loadTasks();
