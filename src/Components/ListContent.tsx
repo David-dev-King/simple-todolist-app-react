@@ -26,9 +26,9 @@ interface ListContentProps {
 function ListContent({ lists, setCurrentList, addList, filterLists , setOptions } : ListContentProps) {
     return (
         <div className='p-8 w-full h-full overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]'>
-            <h1 className="text-5xl font-bold mt-10 mb-10">To-do Lists</h1>
+            <h1 className="text-5xl max-lg:text-3xl max-lg:mt-5 max-lg:mb-5 font-bold mt-10 mb-10">To-do Lists</h1>
             <NewListForm onSubmit={addList} onChange={filterLists} />
-            <h2 className="text-3xl font-semibold mt-10 mb-5">Pending</h2>
+            <h2 className="text-3xl max-lg:text-2xl font-semibold mt-10 mb-5">Pending</h2>
             {lists.filter(l => !l.completed).length == 0 && <p className="text-gray-500">No pending lists 🥳</p>}
             <ul>
                 {lists.map(list => !list.completed && list.pinned && (
@@ -38,7 +38,7 @@ function ListContent({ lists, setCurrentList, addList, filterLists , setOptions 
                     <ListItem key={list.id} list={list} setCurrentList={setCurrentList} setOptions={setOptions} />
                 ))}
             </ul>
-            <h2 className="text-3xl font-semibold mt-10 mb-5">Completed</h2>
+            <h2 className="text-3xl max-lg:text-2xl font-semibold mt-10 mb-5">Completed</h2>
             {lists.filter(l => l.completed).length == 0 && <p className="text-gray-500">No completed lists 😔</p>}
             <ul>
                 {lists.map(list => list.completed && (

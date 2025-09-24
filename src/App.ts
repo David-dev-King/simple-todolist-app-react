@@ -319,8 +319,10 @@ export function undoDeleteTask() {
  * @returns {void}
  */
 async function saveLists() {
+    eventBus.dispatchEvent(onLists);
     try {
-        const response = await fetch('http://localhost:3001/users/' + localStorage.getItem('userID')+'/lists', {
+        const apiUrl = import.meta.env.VITE_API_URL;
+        const response = await fetch(`${apiUrl}/users/` + localStorage.getItem('userID')+'/lists', {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -328,7 +330,6 @@ async function saveLists() {
             body: JSON.stringify({ lists: Lists }),
         });
         if (response.ok){
-            eventBus.dispatchEvent(onLists);
             console.log("Lists saved!!!");
         }
     } catch (error) {
@@ -344,7 +345,8 @@ async function saveLists() {
  */
 async function loadLists() {
     try {
-        const response = await fetch('http://localhost:3001/users/' + localStorage.getItem('userID')+'/lists', {
+        const apiUrl = import.meta.env.VITE_API_URL;
+        const response = await fetch(`${apiUrl}/users/` + localStorage.getItem('userID')+'/lists', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',

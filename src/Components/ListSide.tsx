@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 import type { todoList, } from "../App";
 import { Lists } from "../App";
@@ -30,6 +30,19 @@ function ListSide() {
     const [isEditing, setIsEditing] = useState<boolean>(false);
     const [isDeleting, setIsDeleting] = useState<boolean>(false);
 
+    const [isActive, setIsActive] = useState<boolean>(false);
+    
+    const listSideRef = useRef<HTMLDivElement>(null);
+    
+
+    useEffect(() => {
+        function handleClick(e : MouseEvent){
+            if(listSideRef.current && !listSideRef.current.contains(e.target as Node)) setIsActive(false);
+        }
+        document.addEventListener("click", handleClick);
+        return () => {document.removeEventListener("click", handleClick);};
+    }, []);
+
     // Reload the lists everytime the "onLists" event is dispatched
     useEffect(() => {
         function setListsFunc(){ console.log("Lists Loaded"); setLists([...Lists]); setDisplayedLists([...Lists]); };
@@ -46,17 +59,18 @@ function ListSide() {
     }
 
     return (
-        <div className='
+        <div ref={listSideRef} className={`
             bg-[#E1E8ED]
             dark:bg-[#0C2940]
             flex
             flex-row
             rounded-r-[30px]
-            translate-x-[-80%]  
+            translate-x-[-80%]
             *:opacity-0
             [&_.right-arrow-container]:opacity-100
             hover:*:opacity-100
             hover:[&_.right-arrow-container]:opacity-0
+            ${(isActive || isDeleting) && `translate-x-0! *:opacity-100! [&_.right-arrow-container]:!opacity-100 [&_.right-arrow-container]:scale-x-[-100%]! [&_.right-arrow-container]:translate-x-[-100%]! `}
             hover:translate-x-0
             focus-within:*:opacity-100
             focus-within:[&_.right-arrow-container]:opacity-0
@@ -67,24 +81,26 @@ function ListSide() {
             absolute
             z-4
             max-w-1/4
+            max-xl:max-w-2/3
             h-screen
             transition-all
             duration-500
             ease-in-out
-            '>
-                <ScreenOverlay active={isEditing||isDeleting} />
-                <EditListForm isEditing={isEditing} list={selectedList?selectedList:undefined} onSubmit={(id, newName) => {(id && newName) && editList(id, newName); setIsEditing(false)}} onblur={()=>{setIsEditing(false)}} />
-                <DeletePanel list={selectedList?selectedList:undefined} isDeleting={isDeleting} onDelete={(id) => {deleteList(id);}} disable={() => {setIsDeleting(false);}} />
+            `}>
                 <ListOptions isOption={isOption} onDelete={() => {setIsDeleting(true);}} onPin={(id) => {pinList(id);}} onEdit={() => setIsEditing(true)} disable={disableOptions} list={selectedList && {...selectedList}} />
                 <ListContent
-                    lists={displayedLists} setCurrentList={(id) => {setCurrentList(id);}}
+                    lists={displayedLists}
+                    setCurrentList={(id) => {setCurrentList(id); setIsActive(false);}}
                     addList={(name) => {addList(name);}}
                     filterLists={(query) => {setDisplayedLists(Lists.filter(l => l.name.toLowerCase().includes(query.toLowerCase())))}}
                     setOptions={(value, list)=>{setOptions(value); list && setSelectedList({...list});}}
                     />
-                <div className='right-arrow-container sticky top-0 h-screen flex items-center justify-center p-5'>
-                    <i className="fas fa-arrow-right absolute top-1/2 right-1/2 -translate-y-1/2 text-3xl text-gray-400 hover:text-gray-600 cursor-pointer"></i>
+                <div onClick={() => {setIsActive(active =>!active);}} className='right-arrow-container cursor-pointer sticky top-0 h-screen flex items-center justify-center p-5'>
+                    <i className="fas fa-arrow-right absolute top-1/2 right-1/2 -translate-y-1/2 text-3xl text-gray-400 hover:text-gray-600"></i>
                 </div>
+                <ScreenOverlay active={isEditing||isDeleting} />
+                <DeletePanel list={selectedList?selectedList:undefined} isDeleting={isDeleting} onDelete={(id) => {deleteList(id);}} disable={() => {setIsDeleting(false);}} />
+                <EditListForm isEditing={isEditing} list={selectedList?selectedList:undefined} onSubmit={(id, newName) => {(id && newName) && editList(id, newName); setIsEditing(false)}} onblur={()=>{setIsEditing(false)}} />
         </div>
     );
 }

@@ -1,4 +1,4 @@
-import React, { useState, type FormEventHandler } from 'react';
+import React, { useState } from 'react';
 import { loadTasks } from '../App';
 
 /**
@@ -22,19 +22,26 @@ interface LoginFormProps {
 function LoginForm({active, toggleSignup, disableForms} : LoginFormProps) {
     const [username, setUsername] = useState<string>("");
     const [password, setPassword] = useState<string>("");
-    const [errMessage, setErrMessage] = useState<boolean>(false);
+    const [errMessage, setErrMessage] = useState<string>("");
 
 
     const handleSubmit = async (event : React.FormEvent<HTMLFormElement>) => {
         event.preventDefault(); // Prevents the default form submission behavior
 
-      try {
-          const response = await fetch('http://localhost:3001/login', {
-              method: 'POST',
-              headers: {
-                  'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({ username, password }),
+        try {
+            const trimmedUsername = username.trim();
+            const trimmedPassword = password.trim();
+            if (trimmedUsername === "" || trimmedPassword === "") {
+                setErrMessage("Username and password cannot be empty");
+                return;
+            }
+            const apiUrl = import.meta.env.VITE_API_URL;
+            const response = await fetch(`${apiUrl}/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username: trimmedUsername, password: trimmedPassword }),
         });
 
         if (response.ok) {
@@ -44,11 +51,11 @@ function LoginForm({active, toggleSignup, disableForms} : LoginFormProps) {
             localStorage.setItem('userID', user.id);
             await loadTasks();
             console.log('User logged in:', user.message);
-            setErrMessage(true);
+            setErrMessage("");
         } else {
             // Handle backend errors
             console.error('Failed to log user in:', response.statusText);
-            setErrMessage(true);
+            setErrMessage("Invalid username or password");
         }
       } catch (error) {
           console.error('Error during login:', error);
@@ -106,10 +113,10 @@ function LoginForm({active, toggleSignup, disableForms} : LoginFormProps) {
                   onChange={(e) => setPassword(e.target.value)}
                 />
             </div>
-            <p className="text-red-500 italic">{errMessage && "Invalid username or password"}</p>
+            <p className="text-red-500 italic">{errMessage}</p>
             <div className="flex flex-row items-center justify-between *:inline">
                 <p>Don't have an account? <span className="text-amber-500 cursor-pointer" onClick={() =>{setUsername(""); setPassword(""); toggleSignup();}}>sign up.</span></p>
-                <button type="submit" className="p-4 rounded-xl basis-1/2 bg-amber-300 hover:bg-amber-500 dark:bg-amber-500 cursor-pointer dark:hover:bg-amber-600 outline-amber-50 :hover:outline-2 hover:shadow-[0_0_10px_1px_theme('colors.amber.500')] transition-all duration-200 ease-in-out">Log In</button>
+                <button type="submit" className="p-4 rounded-xl basis-1/2 bg-amber-300 active:bg-amber-300 hover:bg-amber-500 dark:bg-amber-500 dark:active:bg-amber-500 cursor-pointer dark:hover:bg-amber-600 outline-amber-50 :hover:outline-2 hover:shadow-[0_0_10px_1px_theme('colors.amber.500')] transition-all duration-200 ease-in-out">Log In</button>
             </div>
         </form>
     );

@@ -23,6 +23,20 @@ interface EditListFormProps {
 function EditListForm({ list, isEditing, onSubmit, onblur } : EditListFormProps) {
     const [inputValue, setInputValue] = useState(list?.name||"");
     const listInputRef = useRef<HTMLInputElement>(null);
+    const formRef = useRef<HTMLFormElement>(null);
+
+    // Close the form if clicked outside of it 
+    useEffect(() => {
+        function handleClickOutside(event: MouseEvent) {
+            if (formRef.current && !formRef.current.contains(event.target as Node)) {
+                if (onblur) onblur();
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [formRef, onblur]);
 
     // Change the text in the input element to the list name and focus on the input element once it appears
     useEffect (() => {setInputValue(list?.name||""); isEditing && (listInputRef.current as HTMLInputElement).focus();}, [list, isEditing]);
@@ -40,49 +54,51 @@ function EditListForm({ list, isEditing, onSubmit, onblur } : EditListFormProps)
 
 
     return (
-        <form className="
-            fixed
-            top-1/4
-            left-[40vw]
-            !translate-x-0
-            flex
-            items-center
-            justify-between
-            !opacity-100
-            bg-white
-            p-4
-            rounded-full
-            text-gray-800
-            mb-8
-            w-xl
-            z-6
-            "
-            id="edit-list-form"
-            onSubmit={handleSubmit}
-            onBlur={onblur}
-        >
-            <input
-                ref={listInputRef}
-                className="
-                    grow
-                    outline-amber-100
-                    focus:shadow-[0_0_10px_1px_theme('colors.amber.500')]
-                    p-1
-                    transition-all
-                    duration-200
-                    ease-in-out
-                    "
-                id="edit-list-input"
-                type="text"
-                placeholder='Enter new description'
-                autoComplete='off'
-                value={inputValue}
-                onChange={e => setInputValue(e.target.value)}
-            />
-            
-            <span className='w-0.5 h-7 bg-black mr-3 ml-3'></span>
-            <button type="submit" className="p-1 pl-5 pr-5 rounded-xl outline-amber-50 hover:outline-2 hover:bg-amber-100 hover:shadow-[0_0_10px_1px_theme('colors.amber.500')] transition-all duration-200 ease-in-out"><i className='fas fa-check'></i></button>
-        </form>
+        <div className='fixed h-screen w-screen flex justify-center items-center'>
+            <form ref={formRef} className="
+                absolute
+                top-1/3
+                !translate-x-0
+                flex
+                items-center
+                justify-between
+                !opacity-100
+                bg-white
+                p-4
+                rounded-full
+                text-gray-800
+                mb-8
+                w-xl
+                max-lg:w-md
+                max-sm:w-xs
+                z-6
+                "
+                id="edit-list-form"
+                onSubmit={handleSubmit}
+            >
+                <input
+                    ref={listInputRef}
+                    className="
+                        w-full
+                        outline-amber-100
+                        focus:shadow-[0_0_10px_1px_theme('colors.amber.500')]
+                        p-1
+                        transition-all
+                        duration-200
+                        ease-in-out
+                        "
+                    id="edit-list-input"
+                    type="text"
+                    placeholder='Enter new description'
+                    autoComplete='off'
+                    value={inputValue}
+                    onChange={e => setInputValue(e.target.value)}
+                />
+                
+                <span className='w-0.5 h-7 bg-black mr-3 ml-3'></span>
+                <button type="submit" className="p-1 pl-5 pr-5 rounded-xl outline-amber-50 hover:outline-2 hover:bg-amber-100  active:bg-amber-200 active:shadow-[0_0_10px_1px_theme('colors.amber.500')] hover:shadow-[0_0_10px_1px_theme('colors.amber.500')] transition-all duration-200 ease-in-out"><i className='fas fa-check'></i></button>
+            </form>
+        </div>
     );
 };
 

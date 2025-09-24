@@ -1,4 +1,4 @@
-import React, { useState, type FormEventHandler } from 'react';
+import React, { useState } from 'react';
 import { loadTasks } from '../App';
 
 /**
@@ -32,12 +32,19 @@ function SignupForm({active, toggleLogin, disableForms} : SignupFormProps) {
         }
 
     try {
-        const response = await fetch('http://localhost:3001/users', {
+        const trimmedUsername = username.trim();
+        const trimmedPassword = password.trim();
+        if (trimmedUsername === "" || trimmedPassword === "") {
+            setErrMessage("Username and password cannot be empty");
+            return;
+        }
+        const apiUrl = import.meta.env.VITE_API_URL;
+        const response = await fetch(`${apiUrl}/users`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-          body: JSON.stringify({ username, password }),
+          body: JSON.stringify({ username: trimmedUsername, password: trimmedPassword }),
       });
 
       if (response.ok) {
@@ -134,7 +141,7 @@ function SignupForm({active, toggleLogin, disableForms} : SignupFormProps) {
             <p className="text-red-500 italic">{errMessage}</p>
             <div className="flex flex-row items-center justify-between *:inline">
                 <p>Already have an account? <span className="text-amber-500 cursor-pointer" onClick={() =>{setUsername(""); setPassword(""); setErrMessage(""); toggleLogin();}}>Log in.</span></p>
-                <button type="submit" className="p-4 rounded-xl basis-1/2 bg-amber-300 hover:bg-amber-500 dark:bg-amber-500 cursor-pointer dark:hover:bg-amber-600 outline-amber-50 :hover:outline-2 hover:shadow-[0_0_10px_1px_theme('colors.amber.500')] transition-all duration-200 ease-in-out">Sign Up</button>
+                <button type="submit" className="p-4 rounded-xl basis-1/2 bg-amber-300 active:bg-amber-300 hover:bg-amber-500 dark:bg-amber-500 dark:active:bg-amber-500 cursor-pointer dark:hover:bg-amber-600 outline-amber-50 :hover:outline-2 hover:shadow-[0_0_10px_1px_theme('colors.amber.500')] transition-all duration-200 ease-in-out">Sign Up</button>
             </div>
         </form>
     );

@@ -15,7 +15,6 @@ import { eventBus } from '../App';
 
 var curTask : task;
 var selectedTaskId : number;
-var isEditing = false;
 
 
 /**
@@ -29,15 +28,14 @@ var isEditing = false;
 function TaskSide() {
     const [currentList, setCurrentList] = useState<todoList | null>(curList?{...curList}:null);
     const [, set] = useState<task | null>(null);
-    const [, setEditing] = useState(isEditing);
+    const [isEditing, setEditing] = useState(false);
     document.title = "Task Manager - " + (curList ? curList.name : "No List Selected");
 
     // Close edit form on Escape key press
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === "Escape" && isEditing) {
-                isEditing = false;
-                setEditing(isEditing);
+                setEditing(false);
             }
         };
         document.addEventListener("keydown", handleKeyDown);
@@ -63,23 +61,14 @@ function TaskSide() {
             justify-center
             overflow-y-auto
             h-screen
-            w-full
+            w-screen
         ">
-            <ScreenOverlay active={isEditing} />
-
-
-            <EditTaskForm
-            task={{...curTask}}
-            isEditing = {isEditing}
-            onSubmit={(id, newText) => {editTask(id||0, newText||""); isEditing = false; setEditing(isEditing)}}
-            onblur={() => {isEditing = false; setEditing(isEditing)}}
-            />
             {
                 currentList &&
                 <TaskContent
                 currentList={currentList}
                 addTask={(e) => {addTask(e);}}
-                editTask={(task) => {curTask = task; isEditing = true; set(task); setEditing(isEditing) }}
+                editTask={(task) => {curTask = task; set(task); setEditing(true) }}
                 toggleComplete={(id) => {completeTask(id);}}
                 deleteTask={(id) => {deleteTask(id);}}
                 selectTask={(id) => {selectedTaskId = id;}}
@@ -88,10 +77,19 @@ function TaskSide() {
             }
             { !currentList &&
                 <>
-                    <h1 className='z-6 text-7xl p-15 font-black'>No List Selected</h1>
+                    <h1 className=' text-7xl p-15 font-black'>No List Selected</h1>
                 </>
             }
             <UndoButton undoDeleteTask={() => {undoDeleteTask();}} disabled={deletedTasks.length === 0} />
+            <ScreenOverlay active={isEditing} />
+
+
+            <EditTaskForm
+            task={{...curTask}}
+            isEditing = {isEditing}
+            onSubmit={(id, newText) => {editTask(id||0, newText||""); console.log("edited task"); setEditing(false);}}
+            onblur={() => {setEditing(false)}}
+            />
             
         </div>
         );

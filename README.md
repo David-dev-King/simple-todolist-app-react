@@ -31,6 +31,13 @@ The project is finally live 🥳. It's still not responsive for mobile though. D
 
 Basic mobile support added. I'd like to start by saying, I am by no means a designer, but it turned out ok if I do say so myself. Check it out with the same link above ☝️.
 
+## ✍️ Update
+
+Some much-needed security updates 😌.
+-	Implemented password hashing
+-	Utilizing environmental variables for security when pushing code.
+I still have a lot to work on, like login persistence and cleaning up the UI. Until then, thanks for checking this out 🙏.
+
 
 ## 🙏 Thanks
 

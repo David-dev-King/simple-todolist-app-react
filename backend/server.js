@@ -1,14 +1,27 @@
 import express from 'express';
 import mongoose from 'mongoose';
-import { MongoClient, ServerApiVersion } from 'mongodb';
 import cors from 'cors';
 import ServerlessHttp from 'serverless-http';
-import http from 'http';
+import bycrypt from 'bcryptjs';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 
+const port = 3001;
+const server = express();
+
+server.use(cors());
+server.use(express.json());
 
 
-mongoose.connect('mongodb://127.0.0.1:27017/todolistDB')
+const uri = process.env.MONGODB_URI;
+
+if (!uri) {
+    console.error('MONGODB_URI is not defined in environment variables');
+    process.exit(1);
+}
+mongoose.connect(uri)
     .then(() => {console.log('Connected to mongoDB!')})
     .catch(err => {console.error('Could not connect to mongoDB:', err)});
 
@@ -41,18 +54,24 @@ const userSchema = new mongoose.Schema({
 const User = mongoose.model('User', userSchema);
 
 
-const port = 3001;
-const server = express();
-
-server.use(cors());
-server.use(express.json());
+// Hash pasword before saving user
+const hashPassword = async (password) =>{
+    try{
+        const salt = await bycrypt.genSalt(10);
+        return bycrypt.hash(password, salt);
+    } catch (error) {
+        console.error('Error hashing password:', error);
+        throw error;
+    }
+}
 
 
 
 // Create a new user
 server.post('/users', async (req, res) =>{
     const { username, password } = req.body;
-    const newUser = new User({ username, password, lists: [] });
+    const hashedPassword = await hashPassword(password);
+    const newUser = new User({ username, password : hashedPassword, lists: [] });
     try {
         await newUser.save();
         res.status(201).json({ message: 'User created', id: newUser._id, user: newUser });
@@ -109,9 +128,8 @@ server.post('/login', async (req, res) => {
             return res.status(401).send('Invalid username or password');
         }
 
-        // In a real application, you would compare the provided password
-        // with the hashed password stored in the database.
-        if (password !== user.password) {
+        const passwordMatch = await bycrypt.compare(password, user.password);
+        if (passwordMatch === false) {
             return res.status(401).send('Invalid username or password');
         }
 
@@ -122,10 +140,11 @@ server.post('/login', async (req, res) => {
 });
 
 
+const connectAndServe = async (event, context) => {
+    if (mongoose.connection.readyState === 0) {
+        await mongoose.connect(uri);
+    }
+    return ServerlessHttp(server)(event, context);
+};
 
-server.listen(port, () => {
-    console.log("running on port 3001");
-});
-
-
-export const handler = ServerlessHttp(server);
+export const handler = connectAndServe;

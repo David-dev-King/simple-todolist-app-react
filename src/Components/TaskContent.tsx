@@ -36,7 +36,7 @@ function TaskContent({ currentList, addTask, editTask, toggleComplete, deleteTas
     return (
         <div className='
             max-w-1/3 max-lg:max-w-2/3'>
-            <h1 className="text-5xl font-bold mt-10 mb-10">{currentList.name}</h1>
+            <h1 className="text-5xl font-bold mt-10 mb-10 max-lg:text-4xl max-lg:mt-7 max-lg:mb-7">{currentList.name}</h1>
             <NewTaskForm onSubmit={addTask} />
             <TaskPanel tasks={currentList.tasks} editTask={editTask} deleteTask={deleteTask} toggleComplete={toggleComplete} selectTask={selectTask} moveTask={moveTask}/>
         </div>

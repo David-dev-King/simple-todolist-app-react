@@ -23,6 +23,20 @@ interface EditTaskFormProps {
 function EditTaskForm({ task, isEditing, onSubmit, onblur } : EditTaskFormProps) {
     const [inputValue, setInputValue] = useState(task?.text||"");
     const taskInputRef = useRef<HTMLInputElement>(null);
+    const formRef = useRef<HTMLFormElement>(null);
+
+    // Close the form if clicked outside of it 
+    useEffect(() => {
+        function handleClickOutside(event: MouseEvent) {
+            if (formRef.current && !formRef.current.contains(event.target as Node)) {
+                if (onblur) onblur();
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [formRef, onblur]);
 
 
     // Change the text in the input element to the task text and focus on the input element once it appears
@@ -46,7 +60,7 @@ function EditTaskForm({ task, isEditing, onSubmit, onblur } : EditTaskFormProps)
     };
 
     return (
-        <form className="
+        <form ref={formRef} className="
             fixed
             flex
             items-center
@@ -57,17 +71,18 @@ function EditTaskForm({ task, isEditing, onSubmit, onblur } : EditTaskFormProps)
             text-gray-800
             mb-8
             w-xl
+            max-lg:w-md
+            max-sm:w-2/3
             z-6
             "
             style={{top: taskTop, left: taskLeft}}
             id="edit-task-form"
             onSubmit={handleSubmit}
-            onBlur={onblur}
         >
             <input
                 ref={taskInputRef}
                 className="
-                    grow
+                    w-full
                     outline-amber-100
                     focus:shadow-[0_0_10px_1px_theme('colors.amber.500')]
                     p-1
@@ -84,7 +99,7 @@ function EditTaskForm({ task, isEditing, onSubmit, onblur } : EditTaskFormProps)
             />
             
             <span className='w-0.5 h-7 bg-black mr-3 ml-3'></span>
-            <button type="submit" className="p-1 pl-5 pr-5 rounded-xl outline-amber-50 hover:outline-2 hover:bg-amber-100 hover:shadow-[0_0_10px_1px_theme('colors.amber.500')] transition-all duration-200 ease-in-out"><i className='fas fa-check'></i></button>
+            <button type="submit" className="p-1 pl-5 pr-5 rounded-xl outline-amber-50 hover:outline-2 hover:bg-amber-100 active:bg-amber-200 active:shadow-[0_0_10px_1px_theme('colors.amber.500')] hover:shadow-[0_0_10px_1px_theme('colors.amber.500')] transition-all duration-200 ease-in-out"><i className='fas fa-check'></i></button>
         </form>
     );
 };
