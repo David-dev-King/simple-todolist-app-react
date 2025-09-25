@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { loadTasks } from '../App';
+import { loadTasks, setUserID } from '../App';
 
 /**
  * @param {SignupFormProps} props The props for the SignupForm component.
@@ -44,14 +44,17 @@ function SignupForm({active, toggleLogin, disableForms} : SignupFormProps) {
             headers: {
                 'Content-Type': 'application/json',
             },
-          body: JSON.stringify({ username: trimmedUsername, password: trimmedPassword }),
+            body: JSON.stringify({ username: trimmedUsername, password: trimmedPassword }),
+            credentials: 'include', // Include cookies in the request
       });
 
       if (response.ok) {
           // User was successfully created
           const newUser = await response.json();
           disableForms();
-          localStorage.setItem('userID', newUser.id);
+          localStorage.setItem('accessToken', newUser.accessToken);
+          localStorage.setItem('refreshToken', newUser.refreshToken);
+          setUserID(newUser.id);
           await loadTasks();
           console.log('User created:', newUser);
           setErrMessage("");

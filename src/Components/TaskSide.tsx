@@ -12,6 +12,7 @@ import UndoButton from './UndoButton';
 import { moveTask } from '../App';
 
 import { eventBus } from '../App';
+import LogoutButton from './LogoutButton';
 
 var curTask : task;
 var selectedTaskId : number;
@@ -81,6 +82,7 @@ function TaskSide() {
                 </>
             }
             <UndoButton undoDeleteTask={() => {undoDeleteTask();}} disabled={deletedTasks.length === 0} />
+            <LogoutButton />
             <ScreenOverlay active={isEditing} />
 
 

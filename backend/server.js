@@ -1,19 +1,30 @@
-import express from 'express';
-import mongoose from 'mongoose';
-import cors from 'cors';
-import ServerlessHttp from 'serverless-http';
-import bycrypt from 'bcryptjs';
-import dotenv from 'dotenv';
+// Imports
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+const ServerlessHttp = require('serverless-http');
+const bcrypt = require('bcryptjs');
+const dotenv = require('dotenv');
+const jwt = require('jsonwebtoken'); // Import jsonwebtoken
 
 dotenv.config();
 
 
-const port = 3001;
+const jwtSecret = process.env.JWT_SECRET;
+if (!jwtSecret) {
+    console.error('JWT_SECRET is not defined in environment variables');
+    process.exit(1);
+}
+
+
 const server = express();
 
-server.use(cors());
+// middleware setup
+server.use(cors({
+    origin: process.env.FRONTEND_URL || 'http://localhost:5137',
+    credentials: true, // This allows the session cookie to be sent
+}));
 server.use(express.json());
-
 
 const uri = process.env.MONGODB_URI;
 
@@ -57,8 +68,8 @@ const User = mongoose.model('User', userSchema);
 // Hash pasword before saving user
 const hashPassword = async (password) =>{
     try{
-        const salt = await bycrypt.genSalt(10);
-        return bycrypt.hash(password, salt);
+        const salt = await bcrypt.genSalt(10);
+        return bcrypt.hash(password, salt);
     } catch (error) {
         console.error('Error hashing password:', error);
         throw error;
@@ -66,6 +77,28 @@ const hashPassword = async (password) =>{
 }
 
 
+const authenticateToken = (req, res, next) => {
+    // Get the token from the Authorization header
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+
+    if (token == null) {
+        return res.status(401).send('No token provided. Unauthorized');
+    }
+
+    jwt.verify(token, jwtSecret, (err, user) => {
+        if (err) {
+            return res.status(403).send('Invalid token. Forbidden');
+        }
+        // Attach the user ID from the token payload to the request object
+        req.userId = user.id;
+        next();
+    });
+};
+
+
+// Middleware to protect routes
+server.use('/users/:userId/lists', authenticateToken);
 
 // Create a new user
 server.post('/users', async (req, res) =>{
@@ -74,7 +107,12 @@ server.post('/users', async (req, res) =>{
     const newUser = new User({ username, password : hashedPassword, lists: [] });
     try {
         await newUser.save();
-        res.status(201).json({ message: 'User created', id: newUser._id, user: newUser });
+
+        // Generate JWT tokens
+        const accessToken = jwt.sign({ id: newUser._id }, jwtSecret, { expiresIn: '1d' });
+        const refreshToken = jwt.sign({ id: newUser._id }, jwtSecret, { expiresIn: '7d' });
+
+        res.status(201).json({ message: 'User created', id: newUser._id, user: newUser, accessToken: accessToken, refreshToken: refreshToken });
     } catch (error) {
         res.status(400).json({ message: 'Error creating user', error });
     }
@@ -128,15 +166,46 @@ server.post('/login', async (req, res) => {
             return res.status(401).send('Invalid username or password');
         }
 
-        const passwordMatch = await bycrypt.compare(password, user.password);
+        const passwordMatch = await bcrypt.compare(password, user.password);
         if (passwordMatch === false) {
             return res.status(401).send('Invalid username or password');
         }
 
-        res.status(200).send({message: 'Login successful', id: user._id});
+
+        // Generate JWT tokens
+        const accessToken = jwt.sign({ id: user._id }, jwtSecret, { expiresIn: '1d' });
+        const refreshToken = jwt.sign({ id: user._id }, jwtSecret, { expiresIn: '7d' });
+
+
+        res.status(200).send({message: 'Login successful', id: user._id, accessToken: accessToken, refreshToken: refreshToken });
     } catch (err) {
         res.status(500).send(err.message);
     }
+});
+
+server.post('/token', (req, res) => {
+    const refreshToken = req.body.refreshToken;
+
+    if (refreshToken == null) {
+        return res.status(401).send('Refresh Token Required');
+    }
+
+    jwt.verify(refreshToken, jwtSecret, (err, user) => {
+        if (err) {
+            // The refresh token is invalid or expired
+            return res.status(403).send('Invalid Refresh Token');
+        }
+        
+        // If valid, issue a new access token
+        const newAccessToken = jwt.sign({ id: user.id }, jwtSecret, { expiresIn: '1d' });
+        
+        res.status(200).send({ accessToken: newAccessToken });
+    });
+});
+
+
+server.get('/status', authenticateToken, (req, res) => {
+    res.status(200).json({ isLoggedIn: true, userId: req.userId });
 });
 
 
@@ -147,4 +216,10 @@ const connectAndServe = async (event, context) => {
     return ServerlessHttp(server)(event, context);
 };
 
-export const handler = connectAndServe;
+module.exports.handler = connectAndServe;
+
+// For local testing
+
+// server.listen(3001, () => {
+//     console.log('Server is running on port 3001');
+// });

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { loadTasks } from '../App';
+import { loadTasks, setUserID } from '../App';
 
 /**
  * @param {LoginFormProps} props The props for the LoginForm component.
@@ -42,13 +42,16 @@ function LoginForm({active, toggleSignup, disableForms} : LoginFormProps) {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({ username: trimmedUsername, password: trimmedPassword }),
+                credentials: 'include', // Include cookies in the request
         });
 
         if (response.ok) {
             // User was successfully logged in
             const user = await response.json();
             disableForms();
-            localStorage.setItem('userID', user.id);
+            localStorage.setItem('accessToken', user.accessToken);
+            localStorage.setItem('refreshToken', user.refreshToken);
+            setUserID(user.id);
             await loadTasks();
             console.log('User logged in:', user.message);
             setErrMessage("");

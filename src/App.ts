@@ -69,7 +69,36 @@ export const onLists = new CustomEvent("onLists");
  */
 export const onTasks = new CustomEvent("onTasks");
 
+/**
+ * @type {CustomEvent}
+ * @description A custom event dispatched when the user's authentication token expires.
+ */
+export const onTokenExpire = new CustomEvent("onTokenExpire");
 
+/**
+ * @type {string}
+ * @description The ID of the currently logged-in user.
+ */
+let userID : string = "";
+
+/**
+ * @function getUserID
+ * @description Retrieves the ID of the currently logged-in user.
+ * @returns {string} The user ID.
+ */
+export function getUserID(): string {
+    return userID;
+}
+
+/**
+ * @function setUserID
+ * @description Sets the ID of the currently logged-in user.
+ * @param {string} id The user ID to set.
+ * @returns {void}
+ */
+export function setUserID(id: string): void {
+    userID = id;
+}
 
 
 
@@ -309,7 +338,24 @@ export function undoDeleteTask() {
 }
 
 
-
+/**
+ * @function helperSaveLists
+ * @description Helper function to save lists with a given access token.
+ * @param {string} accessToken The access token for authentication.
+ * @returns {Response} The fetch response object.
+ */
+async function helperSaveLists(accessToken: string) {
+    const apiUrl = import.meta.env.VITE_API_URL;
+    const response = await fetch(`${apiUrl}/users/` + userID +'/lists', {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'authorization': 'Bearer ' + accessToken,
+        },
+        body: JSON.stringify({ lists: Lists }),
+    });
+    return response;
+}
 
 
 
@@ -322,15 +368,35 @@ async function saveLists() {
     eventBus.dispatchEvent(onLists);
     try {
         const apiUrl = import.meta.env.VITE_API_URL;
-        const response = await fetch(`${apiUrl}/users/` + localStorage.getItem('userID')+'/lists', {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ lists: Lists }),
-        });
+        let accessToken = localStorage.getItem('accessToken') || "";
+        const response = await helperSaveLists(accessToken);
         if (response.ok){
             console.log("Lists saved!!!");
+        }
+        else if (response.status === 401 || response.status === 403) {
+            const refreshToken = localStorage.getItem('refreshToken') || "";
+            const refreshResponse = await fetch(`${apiUrl}/token`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ refreshToken: refreshToken }),
+            });
+            if (refreshResponse.ok) {
+                const data = await refreshResponse.json();
+                accessToken = data.accessToken;
+                localStorage.setItem('accessToken', accessToken);
+                const retryResponse = await helperSaveLists(accessToken);
+                if (retryResponse.ok) {
+                    console.log("Lists saved after token refresh!!!");
+                } else {
+                    console.error('Failed to save lists after token refresh:', retryResponse.statusText);
+                    eventBus.dispatchEvent(onTokenExpire);
+                }
+            } else {
+                console.error('Failed to refresh token:', refreshResponse.statusText);
+                eventBus.dispatchEvent(onTokenExpire);
+            }
         }
     } catch (error) {
         console.error('Error saving lists:', error);
@@ -346,11 +412,13 @@ async function saveLists() {
 async function loadLists() {
     try {
         const apiUrl = import.meta.env.VITE_API_URL;
-        const response = await fetch(`${apiUrl}/users/` + localStorage.getItem('userID')+'/lists', {
+        const response = await fetch(`${apiUrl}/users/` + userID +'/lists', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
+                'authorization': 'Bearer ' + localStorage.getItem('accessToken'),
             },
+            credentials: 'include', // Include cookies in the request
         });
         if (response.ok){
             const data = await response.json();
